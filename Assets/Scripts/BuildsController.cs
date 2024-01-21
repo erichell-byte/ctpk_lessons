@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 public class BuildsController : MonoBehaviour
@@ -13,7 +14,7 @@ public class BuildsController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            int randomIndex = Random.Range(0, buildPrefabs.Length-1);
+            int randomIndex = Random.Range(0, buildPrefabs.Length);
             Vector3 randomPosition = GetRandomPositionInBounds();
 
             GameObject build = Instantiate(buildPrefabs[randomIndex], randomPosition, Quaternion.identity);
@@ -23,10 +24,7 @@ public class BuildsController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.W))
         {
-            foreach (var build in spawnedBuilds)
-            {
-                Destroy(build);
-            }
+            spawnedBuilds.ForEach(Destroy);
         }
     }
 
