@@ -1,33 +1,39 @@
+using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class BuildsController : MonoBehaviour
 {
-    public GameObject[] buildPrefabs;
-    public Collider spawnBoundaryCollider;
-    public int spawnHeight;
+    [SerializeField] private GameObject[] buildPrefabs;
+    [SerializeField] private Collider spawnBoundaryCollider;
+    [SerializeField] private int spawnHeight;
+    [SerializeField] private float timeToSpawn = 2f;
+    [SerializeField] private float repeatRate = 3f;
 
     private List<GameObject> spawnedBuilds = new();
-    
-    void Update()
+
+    private static BuildsController _instance;
+
+    public Action<Vector3> OnBuildCreated;
+
+
+    private void Start()
     {
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            int randomIndex = Random.Range(0, buildPrefabs.Length);
-            Vector3 randomPosition = GetRandomPositionInBounds();
-
-            GameObject build = Instantiate(buildPrefabs[randomIndex], randomPosition, Quaternion.identity);
-
-            spawnedBuilds.Add(build);
-        }
-
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            spawnedBuilds.ForEach(Destroy);
-        }
+        InvokeRepeating(nameof(SpawnRandomBuild), timeToSpawn,repeatRate);
     }
+    
+    private void SpawnRandomBuild()
+    {
+        int randomIndex = Random.Range(0, buildPrefabs.Length);
+        Vector3 randomPosition = GetRandomPositionInBounds();
 
+        GameObject build = Instantiate(buildPrefabs[randomIndex], randomPosition, Quaternion.identity);
+
+        spawnedBuilds.Add(build);
+        
+        OnBuildCreated?.Invoke(build.transform.position);
+    }
     private Vector3 GetRandomPositionInBounds()
     {
         Vector3 minBounds = spawnBoundaryCollider.bounds.min;

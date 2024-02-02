@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -5071397144641456127}
   m_Layer: 0
   m_Name: BrickHouse_IntWall_A
-  m_TagString: Untagged
+  m_TagString: BuildToDestroy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
