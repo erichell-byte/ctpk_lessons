@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
@@ -9,19 +11,21 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpingPower;
     [SerializeField] private Transform groundChecker;
     [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private float  rotSmoothTime= 0.5f;
     [SerializeField] private Detector detector;
+    [SerializeField] private Animator animator;
 
-    private readonly string VerticalAxis = "Vertical";
-    private readonly string HorizontalAxis = "Horizontal";
+    
 
     private Rigidbody _rb;
-    private bool _doubleJump;
+    // for test
+    public bool _doubleJump;
+    
     private float _horizontalInput;
     private float _verticalInput;
     private Vector3 _movement;
     private float _currentRotate;
     private float _rotVel;
+    private bool nowIsJumping;
 
     public Action OnBuildCollected;
 
@@ -31,6 +35,11 @@ public class PlayerController : MonoBehaviour
         detector.OnBuildDetected += BuildTouched;
     }
 
+    private void Awake()
+    {
+        
+    }
+
     private void OnDestroy()
     {
         detector.OnBuildDetected -= BuildTouched;
@@ -38,50 +47,60 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        _horizontalInput = Input.GetAxis(HorizontalAxis);
-        _verticalInput = Input.GetAxis(VerticalAxis);
-        
-        if (IsGrounded())
+        if (IsGrounded() && _rb.velocity.y < 0 && !nowIsJumping)
         {
             _doubleJump = false;
-        }
-        
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            if (IsGrounded() || _doubleJump)
-            {
-                _rb.velocity = new Vector3(_rb.velocity.x, jumpingPower, _rb.velocity.z);
-
-                _doubleJump = !_doubleJump;
-            }
-        }
-
-        if (Input.GetKeyUp(KeyCode.Space) && _rb.velocity.y > 0f)
-        {
-            _rb.velocity = new Vector3(_rb.velocity.x, _rb.velocity.y * 0.5f);
         }
     }
     
     private void FixedUpdate()
     {
         _movement = new Vector3(0, 0, _verticalInput).normalized;
-        _rb.AddRelativeForce(_movement * (movSpeed * Time.fixedDeltaTime), ForceMode.VelocityChange);
+        _rb.AddRelativeForce(_movement * movSpeed, ForceMode.VelocityChange);
         
-        float rotateY = _horizontalInput * rotSpeed * Time.fixedDeltaTime;
-        _currentRotate = Mathf.SmoothDampAngle(_currentRotate, rotateY, ref _rotVel, rotSmoothTime * Time.fixedDeltaTime);
-        transform.eulerAngles += new Vector3(0, _currentRotate, 0);
+        float rotateY = _horizontalInput * rotSpeed;
+        _rb.AddRelativeTorque(Vector3.up * rotateY, ForceMode.VelocityChange);
+        
+        if (_verticalInput == 0)
+            animator.SetBool("IsRun", false);
     }
     
     private void BuildTouched(Collider build)
     {
         Destroy(build.gameObject);
         OnBuildCollected?.Invoke();
-
     }
 
     private bool IsGrounded()
     {
-        var colliders = Physics.OverlapSphere(groundChecker.position, 0.2f, groundLayer);
+        var colliders = Physics.OverlapSphere(groundChecker.position, 0.1f, groundLayer);
         return colliders.Length > 0;
+    }
+
+    public void OnMovePressed(InputAction.CallbackContext context)
+    {
+        Vector2 move = context.ReadValue<Vector2>();
+        _horizontalInput = move.x;
+        _verticalInput = move.y;
+        animator.SetBool("IsRun", true);
+        Debug.Log("StartMove");
+    }
+
+    public void OnJumpPressed(InputAction.CallbackContext context)
+    {
+        if ((IsGrounded() || _doubleJump) && context.performed)
+        {
+            _rb.AddForce(Vector3.up * jumpingPower, ForceMode.Impulse);
+            _doubleJump = !_doubleJump;
+            nowIsJumping = true;
+            StartCoroutine(DelayToCheckGround());
+            animator.SetBool("IsRun", true);
+        }
+    }
+
+    private IEnumerator DelayToCheckGround()
+    {
+        yield return new WaitForSecondsRealtime(0.5f);
+        nowIsJumping = false;
     }
 }
