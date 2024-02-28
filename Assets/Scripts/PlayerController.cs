@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Detector detector;
     [SerializeField] private Animator animator;
+    [SerializeField] private Animation hitAnimation;
 
     
 
@@ -96,6 +97,11 @@ public class PlayerController : MonoBehaviour
             StartCoroutine(DelayToCheckGround());
             animator.SetBool("IsRun", true);
         }
+    }
+
+    public void OnHitPressed(InputAction.CallbackContext context)
+    {
+        hitAnimation.Play();
     }
 
     private IEnumerator DelayToCheckGround()
