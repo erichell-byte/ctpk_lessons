@@ -22,7 +22,7 @@ public class BuildsController : MonoBehaviour
     {
         InvokeRepeating(nameof(SpawnRandomBuild), timeToSpawn,repeatRate);
     }
-    
+
     private void SpawnRandomBuild()
     {
         int randomIndex = Random.Range(0, buildPrefabs.Length);
@@ -31,9 +31,10 @@ public class BuildsController : MonoBehaviour
         GameObject build = Instantiate(buildPrefabs[randomIndex], randomPosition, Quaternion.identity);
 
         spawnedBuilds.Add(build);
-        
+
         OnBuildCreated?.Invoke(build.transform.position);
     }
+
     private Vector3 GetRandomPositionInBounds()
     {
         Vector3 minBounds = spawnBoundaryCollider.bounds.min;

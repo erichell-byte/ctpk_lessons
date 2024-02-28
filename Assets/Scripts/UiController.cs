@@ -8,12 +8,11 @@ public class UiController : MonoBehaviour
 
 	private void Awake()
 	{
-		hintText.text = "Press Q to hit";
+		hintText.text = "Press Left mouse button to hit";
 	}
 
 	public void UpdateScore(int score)
 	{
 		scoreText.text = score.ToString();
 	}
-
 }

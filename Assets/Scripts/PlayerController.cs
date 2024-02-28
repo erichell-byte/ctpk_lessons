@@ -14,12 +14,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Detector detector;
     [SerializeField] private Animator animator;
     [SerializeField] private Animation hitAnimation;
-
     
-
     private Rigidbody _rb;
-    // for test
-    public bool _doubleJump;
+    private bool _doubleJump;
     
     private float _horizontalInput;
     private float _verticalInput;
@@ -34,11 +31,6 @@ public class PlayerController : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody>();
         detector.OnBuildDetected += BuildTouched;
-    }
-
-    private void Awake()
-    {
-        
     }
 
     private void OnDestroy()
@@ -84,7 +76,6 @@ public class PlayerController : MonoBehaviour
         _horizontalInput = move.x;
         _verticalInput = move.y;
         animator.SetBool("IsRun", true);
-        Debug.Log("StartMove");
     }
 
     public void OnJumpPressed(InputAction.CallbackContext context)
